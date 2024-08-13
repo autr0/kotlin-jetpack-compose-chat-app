@@ -1,3 +1,77 @@
 <resources>
-    <string name="app_name">FirebaseChatApp</string>
+<string name="app_name">Wave Chat</string>
+<string name="title_activity_main">Wave Chat</string>
+
+<!-- String resources for 'Profile' screen   -->
+<string name="Profile">Profile</string>
+<string name="Chats">Chats</string>
+<string name="Users">Users</string>
+<string name="sign_out">Sign out</string>
+<string name="incoming">Incoming</string>
+<string name="outgoing">Outgoing</string>
+<string name="companions">Companions</string>
+<string name="no_requests">No requests</string>
+<string name="no_chats">No chats</string>
+<string name="no_companions">No companions</string>
+<string name="yes">Yes</string>
+<string name="no">No</string>
+<string name="log_out">Are you sure you want to\nlog out of your account?</string>
+
+<!-- String resources for 'ChatsHome' screen  -->
+<string name="my_chats">My chats</string>
+<string name="chats_not_found">Chats not found</string>
+<string name="click_on_floating">Click on the floating button to start</string>
+<string name="new_chat_with_smile">a new chat with your companion 😉</string>
+<string name="unknown_user">Unknown User</string>
+<string name="def_time">04:20</string>
+<string name="def_date">01 Jan 2024</string>
+<string name="smthng_wrong">Oops..Something went wrong!</string>
+
+<!-- String resources for 'ChatsCompanions' screen  -->
+<string name="my_companions">My companions</string>
+<string name="companions_not_found">Companions not found</string>
+<string name="click_below">Click on the button below to go to the</string>
+<string name="users_section_add_companions">Users section and add new companions</string>
+<string name="open_users">OPEN USERS</string>
+<string name="enter_msg_text">Enter a message to your companion:</string>
+<string name="enter_msg_placeholder">Enter message</string>
+<string name="cancel">Cancel</string>
+<string name="send">Send</string>
+
+<!-- String resources for 'ChatScreen' screen  -->
+<string name="online">online</string>
+<string name="offline">offline</string>
+<string name="new_msgs">New messages</string>
+<string name="search">Search</string>
+<string name="out_of">out of</string>
+<string name="edit">Edit</string>
+<string name="copy_to_clipboard">Copy to clipboard</string>
+<string name="copied_to_clipboard">Copied to Clipboard</string>
+<string name="delete">Delete</string>
+<string name="delete_msg_question">Delete this message?</string>
+<string name="also_delete_for">Also delete for</string>
+
+<!-- String resources for notifications   -->
+<string name="notification_request">Incoming Request from</string>
+
+<!-- String resources for 'SignInScreen'   -->
+<string name="sign_in_google">Sign in with Google</string>
+<string name="sign_in_success">Sign In successful</string>
+<string name="sign_out_success">Sign out</string>
+
+<!-- String resources for 'UsersScreen'   -->
+<string name="users_not_found">Users not found</string>
+<string name="went_wrong">Something went wrong, please</string>
+<string name="check_internet">check your Internet connection</string>
+<string name="requests_not_found">Requests not found</string>
+<!-- button text  -->
+<string name="button_sent">SENT</string>
+<string name="button_open_chat">OPEN CHAT</string>
+<string name="button_incoming_request">INCOMING REQUEST</string>
+<string name="button_wait_response">WAITING FOR RESPONSE</string>
+<string name="button_companion">COMPANION</string>
+<string name="button_you">YOU</string>
+<string name="button_request_dialog">REQUEST DIALOG</string>
+<string name="button_cancel">CANCEL</string>
+
 </resources>

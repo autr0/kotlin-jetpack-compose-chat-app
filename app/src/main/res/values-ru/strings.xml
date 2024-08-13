@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wave Chat</string>
+    <string name="title_activity_main">Wave Chat</string>
+
+    <!-- String resources for 'Profile' screen   -->
+    <string name="Profile">Профиль</string>
+    <string name="Chats">Сообщения</string>
+    <string name="Users">Пользователи</string>
+    <string name="sign_out">Выйти</string>
+    <string name="incoming">Входящие</string>
+    <string name="outgoing">Исходящие</string>
+    <string name="companions">Друзья</string>
+    <string name="no_requests">Нет запросов</string>
+    <string name="no_chats">Нет сообщений</string>
+    <string name="no_companions">Нет друзей</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="log_out">Вы уверены, что хотите\nвыйти из своего профиля?</string>
+
+    <!-- String resources for 'ChatsHome' screen  -->
+    <string name="my_chats">Мои сообщения</string>
+    <string name="chats_not_found">Сообщения не найдены</string>
+    <string name="click_on_floating">Нажмите на плавающую кнопку, чтобы создать</string>
+    <string name="new_chat_with_smile">новый чат со своим другом 😉</string>
+    <string name="unknown_user">Неизвестный</string>
+    <string name="def_time">04:20</string>
+    <string name="def_date">01 янв 2024</string>
+    <string name="smthng_wrong">Оой..Что-то пошло не так!</string>
+
+    <!-- String resources for 'ChatsCompanions' screen  -->
+    <string name="my_companions">Мои друзья</string>
+    <string name="companions_not_found">Друзья не найдены</string>
+    <string name="click_below">Нажмите на кнопку ниже, чтобы перейти в</string>
+    <string name="users_section_add_companions">раздел Пользователи и добавить новых друзей</string>
+    <string name="open_users">ПОЛЬЗОВАТЕЛИ</string>
+    <string name="enter_msg_text">Введите сообщение для друга:</string>
+    <string name="enter_msg_placeholder">Введите сообщение</string>
+    <string name="cancel">Отменить</string>
+    <string name="send">Отправить</string>
+
+    <!-- String resources for 'ChatScreen' screen  -->
+    <string name="online">онлайн</string>
+    <string name="offline">оффлайн</string>
+    <string name="new_msgs">Новые сообщения</string>
+    <string name="search">Поиск</string>
+    <string name="out_of">из</string>
+    <string name="edit">Изменить</string>
+    <string name="copy_to_clipboard">Копировать</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
+    <string name="delete">Удалить</string>
+    <string name="delete_msg_question">Удалить это сообщение?</string>
+    <string name="also_delete_for">Также удалить у</string>
+
+    <!-- String resources for notifications   -->
+    <string name="notification_request">Входящий запрос от</string>
+
+    <!-- String resources for 'SignInScreen'   -->
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_success">Вход выполнен успешно</string>
+    <string name="sign_out_success">Выход завершен</string>
+
+    <!-- String resources for 'UsersScreen'   -->
+    <string name="users_not_found">Пользователи не найдены</string>
+    <string name="went_wrong">Что-то пошло не так, пожалуйста</string>
+    <string name="check_internet">проверьте свое Интернет подключение</string>
+    <string name="requests_not_found">Запросы не найдены</string>
+        <!-- button text  -->
+    <string name="button_sent">ОТПРАВЛЕНО</string>
+    <string name="button_open_chat">ОТКРЫТЬ ЧАТ</string>
+    <string name="button_incoming_request">ВХОДЯЩИЙ ЗАПРОС</string>
+    <string name="button_wait_response">ОЖИДАЕТ ОТВЕТА</string>
+    <string name="button_companion">ДРУГ</string>
+    <string name="button_you">ВЫ</string>
+    <string name="button_request_dialog">ДОБАВИТЬ В ДРУЗЬЯ</string>
+    <string name="button_cancel">ОТМЕНИТЬ</string>
+
+</resources>
