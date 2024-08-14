@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.profile.screens
+package com.devautro.firebasechatapp.profile.presentation.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.profile.screens
+package com.devautro.firebasechatapp.profile.presentation.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -52,9 +52,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.profile.ProfileViewModel
-import com.devautro.firebasechatapp.sign_in.model.UserData
-import com.devautro.firebasechatapp.utils.AutoResizedText
+import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
+import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.utils.AutoResizedText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.navigation
+package com.devautro.firebasechatapp.navigation.data
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

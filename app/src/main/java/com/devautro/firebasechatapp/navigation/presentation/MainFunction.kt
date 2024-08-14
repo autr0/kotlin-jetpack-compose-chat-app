@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.navigation
+package com.devautro.firebasechatapp.navigation.presentation
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
@@ -35,12 +35,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.profile.ProfileViewModel
-import com.devautro.firebasechatapp.profile.screens.ExitDialog
-import com.devautro.firebasechatapp.profile.screens.ProfileScreen
-import com.devautro.firebasechatapp.sign_in.SignInScreen
-import com.devautro.firebasechatapp.sign_in.SignInViewModel
-import com.devautro.firebasechatapp.sign_in.model.GoogleAuthUIClient
+import com.devautro.firebasechatapp.navigation.data.TabBarItem
+import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
+import com.devautro.firebasechatapp.profile.presentation.screens.ExitDialog
+import com.devautro.firebasechatapp.profile.presentation.screens.ProfileScreen
+import com.devautro.firebasechatapp.sign_in.presentation.SignInScreen
+import com.devautro.firebasechatapp.sign_in.presentation.SignInViewModel
+import com.devautro.firebasechatapp.sign_in.data.GoogleAuthUIClient
+import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
+import com.devautro.firebasechatapp.users.presentation.screens.UsersScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,7 +51,8 @@ fun MainFunction(
     googleAuthUIClient: GoogleAuthUIClient,
     context: Context,
     lifecycleScope: LifecycleCoroutineScope,
-    profileVm: ProfileViewModel
+    profileVm: ProfileViewModel,
+    usersVm: UsersScreenViewModel
 ) {
     val profileTab = TabBarItem(
         title = stringResource(id = R.string.Profile),
@@ -203,6 +207,13 @@ fun MainFunction(
                     }
                 }
 
+                composable(usersTab.title) {
+                    UsersScreen(
+                        vm = usersVm,
+                        bottomNavPadding = bottomNavPadding
+                    )
+                }
+                
             }
         }
 

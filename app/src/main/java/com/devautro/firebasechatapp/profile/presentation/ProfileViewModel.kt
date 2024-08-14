@@ -1,9 +1,9 @@
-package com.devautro.firebasechatapp.profile
+package com.devautro.firebasechatapp.profile.presentation
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.devautro.firebasechatapp.profile.model.ProfileDataUploader
+import com.devautro.firebasechatapp.profile.data.ProfileDataUploader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

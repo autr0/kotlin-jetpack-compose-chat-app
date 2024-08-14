@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.sign_in
+package com.devautro.firebasechatapp.sign_in.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.sign_in.model.SignInState
+import com.devautro.firebasechatapp.sign_in.data.model.SignInState
 import com.devautro.firebasechatapp.ui.theme.darkThemeSignInButtonColor
 import com.devautro.firebasechatapp.ui.theme.signInButtonStrokeDark
 import com.devautro.firebasechatapp.ui.theme.signInButtonStrokeLight

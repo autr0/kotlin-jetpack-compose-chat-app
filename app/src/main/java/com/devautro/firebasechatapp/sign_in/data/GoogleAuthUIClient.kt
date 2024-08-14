@@ -1,9 +1,11 @@
-package com.devautro.firebasechatapp.sign_in.model
+package com.devautro.firebasechatapp.sign_in.data
 
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import com.devautro.firebasechatapp.R
+import com.devautro.firebasechatapp.sign_in.data.model.SignInResult
+import com.devautro.firebasechatapp.sign_in.data.model.UserData
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient

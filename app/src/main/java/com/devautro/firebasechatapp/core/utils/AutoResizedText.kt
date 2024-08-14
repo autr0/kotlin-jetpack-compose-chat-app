@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.utils
+package com.devautro.firebasechatapp.core.utils
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

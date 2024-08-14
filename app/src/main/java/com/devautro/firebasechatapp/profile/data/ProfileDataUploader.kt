@@ -1,8 +1,9 @@
-package com.devautro.firebasechatapp.profile.model
+package com.devautro.firebasechatapp.profile.data
 
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import com.devautro.firebasechatapp.sign_in.model.UserData
+import com.devautro.firebasechatapp.profile.data.model.ProfileData
+import com.devautro.firebasechatapp.sign_in.data.model.UserData
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

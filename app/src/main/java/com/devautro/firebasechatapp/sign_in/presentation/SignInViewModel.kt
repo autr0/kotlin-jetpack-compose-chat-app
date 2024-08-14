@@ -1,8 +1,8 @@
-package com.devautro.firebasechatapp.sign_in
+package com.devautro.firebasechatapp.sign_in.presentation
 
 import androidx.lifecycle.ViewModel
-import com.devautro.firebasechatapp.sign_in.model.SignInResult
-import com.devautro.firebasechatapp.sign_in.model.SignInState
+import com.devautro.firebasechatapp.sign_in.data.model.SignInResult
+import com.devautro.firebasechatapp.sign_in.data.model.SignInState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

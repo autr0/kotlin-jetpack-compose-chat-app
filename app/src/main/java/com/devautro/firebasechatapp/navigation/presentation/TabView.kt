@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.navigation
+package com.devautro.firebasechatapp.navigation.presentation
 
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -12,7 +12,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import com.devautro.firebasechatapp.utils.AutoResizedText
+import com.devautro.firebasechatapp.core.utils.AutoResizedText
+import com.devautro.firebasechatapp.navigation.data.TabBarItem
 
 // This is a wrapper view that allows us to easily and cleanly
 // reuse this component in any future project

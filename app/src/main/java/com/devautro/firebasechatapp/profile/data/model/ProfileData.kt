@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.profile.model
+package com.devautro.firebasechatapp.profile.data.model
 
 data class ProfileData(
     val name: String? = null,
