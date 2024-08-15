@@ -1,6 +1,7 @@
 package com.devautro.firebasechatapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,6 +16,7 @@ import com.devautro.firebasechatapp.sign_in.data.GoogleAuthUIClient
 import com.devautro.firebasechatapp.ui.theme.FirebaseChatAppTheme
 import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,6 +29,19 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+//  this one to update currentUserData after re-sign in
+    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        val user = auth.currentUser
+        if (user != null) {
+            profileVm.resetProfileVmState()
+            usersVm.resetUsersState()
+            chatsHomeVm.resetChatsHomeVmState()
+            sharedVm.resetSharedVmState()
+            chatScreenVm.resetChatState()
+            Log.d("AuthCheckState", "Hello from authStateListener!")
+        }
+    }
+
     private val profileVm: ProfileViewModel by viewModels()
     private val usersVm: UsersScreenViewModel by viewModels()
     private val chatsHomeVm: ChatsHomeViewModel by viewModels()
@@ -36,7 +51,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // line below + 'adjustResize' in Manifest = good ime behavior
+//      line below + 'adjustResize' in Manifest = good ime behavior
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -55,5 +70,16 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
+    override fun onStart() {
+        super.onStart()
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
+    }
+
 }
 
