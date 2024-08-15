@@ -1,5 +1,6 @@
 package com.devautro.firebasechatapp.core.di
 
+import com.devautro.firebasechatapp.chatScreen.data.ChatRepository
 import com.devautro.firebasechatapp.chatsHome.data.ChatsHomeRepository
 import com.devautro.firebasechatapp.users.data.UsersDataRepository
 import dagger.Module
@@ -22,6 +23,12 @@ object AppModule {
     @Singleton
     fun provideChatsHomeRepository(): ChatsHomeRepository {
         return ChatsHomeRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(): ChatRepository {
+        return ChatRepository()
     }
 
 }

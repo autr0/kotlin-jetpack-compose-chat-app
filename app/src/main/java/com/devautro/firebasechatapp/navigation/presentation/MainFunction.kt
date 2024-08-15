@@ -35,6 +35,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.devautro.firebasechatapp.R
+import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
+import com.devautro.firebasechatapp.chatScreen.presentation.screens.ChatScreen
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.chatsHome.presentation.screens.ChatsHome
 import com.devautro.firebasechatapp.chatsHome.presentation.screens.companionsScreen.CompanionsScreen
@@ -58,7 +60,8 @@ fun MainFunction(
     profileVm: ProfileViewModel,
     usersVm: UsersScreenViewModel,
     chatsHomeVm: ChatsHomeViewModel,
-    sharedVM: SharedChatViewModel
+    sharedVM: SharedChatViewModel,
+    chatScreenVM: ChatScreenViewModel
 ) {
     val profileTab = TabBarItem(
         title = stringResource(id = R.string.Profile),
@@ -236,7 +239,15 @@ fun MainFunction(
                     )
                 }
 
-                composable("chatScreen") {}
+                composable("chatScreen") {
+                    ChatScreen(
+                        vm = chatScreenVM,
+                        onIconCLick = {
+                            navController.popBackStack()
+                        },
+                        sharedVM = sharedVM
+                    )
+                }
 
                 composable("companionsList") {
                     CompanionsScreen(

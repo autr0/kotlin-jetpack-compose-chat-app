@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
 import com.devautro.firebasechatapp.navigation.presentation.MainFunction
@@ -29,9 +31,13 @@ class MainActivity : ComponentActivity() {
     private val usersVm: UsersScreenViewModel by viewModels()
     private val chatsHomeVm: ChatsHomeViewModel by viewModels()
     private val sharedVm: SharedChatViewModel by viewModels()
+    private val chatScreenVm: ChatScreenViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // line below + 'adjustResize' in Manifest = good ime behavior
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             FirebaseChatAppTheme {
@@ -42,7 +48,8 @@ class MainActivity : ComponentActivity() {
                     profileVm = profileVm,
                     usersVm = usersVm,
                     chatsHomeVm = chatsHomeVm,
-                    sharedVM = sharedVm
+                    sharedVM = sharedVm,
+                    chatScreenVM = chatScreenVm
                 )
             }
         }
