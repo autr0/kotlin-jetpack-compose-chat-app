@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsersScreenViewModel @Inject constructor(
-    private val usersDataRep: UsersDataRepository,
+    private val usersDataRepo: UsersDataRepository,
     @ApplicationContext val context: Context
 )  : ViewModel() {
 
@@ -41,7 +41,7 @@ class UsersScreenViewModel @Inject constructor(
         getOutgoingRequests()
         getIncomingRequests()
 
-        if (!_usersList.value.contains(usersDataRep.currentUser)) {
+        if (!_usersList.value.contains(usersDataRepo.currentUser)) {
             addUser()
         }
     }
@@ -74,7 +74,7 @@ class UsersScreenViewModel @Inject constructor(
                     bText = context.getString(R.string.button_companion)
                 )
             }
-            usersDataRep.currentUser.userId == userData.userId -> {
+            usersDataRepo.currentUser.userId == userData.userId -> {
                 UsersButtonState(
                     isEnabled = false,
                     bText = context.getString(R.string.button_you)
@@ -91,33 +91,33 @@ class UsersScreenViewModel @Inject constructor(
 
     private fun getUsersFromDB() {
         viewModelScope.launch {
-            usersDataRep.getUsersFromDB(_usersList.value)
+            usersDataRepo.getUsersFromDB(_usersList.value)
         }
     }
 
     fun sendRequest(userDataArg: UserData) {
         viewModelScope.launch {
-            usersDataRep.sendNewRequest(userDataArg)
+            usersDataRepo.sendNewRequest(userDataArg)
         }
 
     }
 
     private fun getOutgoingRequests() {
         viewModelScope.launch {
-            usersDataRep.getOutgoingRequests(_outgoingRequestsList.value)
+            usersDataRepo.getOutgoingRequests(_outgoingRequestsList.value)
 
         }
     }
 
     private fun getIncomingRequests() {
         viewModelScope.launch {
-            usersDataRep.getIncomingRequests(_incomingRequestsList.value)
+            usersDataRepo.getIncomingRequests(_incomingRequestsList.value)
         }
     }
 
     private fun getCompanions() {
         viewModelScope.launch {
-            usersDataRep.getCompanions(_companionsList.value)
+            usersDataRepo.getCompanions(_companionsList.value)
         }
     }
 
@@ -126,7 +126,7 @@ class UsersScreenViewModel @Inject constructor(
         isApproved: Boolean
     ) {
         viewModelScope.launch {
-            usersDataRep.updateIncomingRequest(
+            usersDataRepo.updateIncomingRequest(
                 userFrom = userFrom,
                 isApproved = isApproved
             )
@@ -135,18 +135,18 @@ class UsersScreenViewModel @Inject constructor(
 
     fun cancelOutgoingRequest(userTo: UserData) {
         viewModelScope.launch {
-            usersDataRep.cancelOutgoingRequest(userTo)
+            usersDataRepo.cancelOutgoingRequest(userTo)
         }
     }
 
     private fun addUser() {
         viewModelScope.launch {
-            usersDataRep.writeNewUserData()
+            usersDataRepo.writeNewUserData()
         }
     }
 
     private fun updateCurrentUser() {
-        usersDataRep.updateCurrentUser()
+        usersDataRepo.updateCurrentUser()
     }
 
     fun resetUsersState() {

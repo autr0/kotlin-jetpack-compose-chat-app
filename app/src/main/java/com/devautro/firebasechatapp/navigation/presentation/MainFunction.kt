@@ -35,6 +35,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.devautro.firebasechatapp.R
+import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
+import com.devautro.firebasechatapp.chatsHome.presentation.screens.ChatsHome
+import com.devautro.firebasechatapp.chatsHome.presentation.screens.companionsScreen.CompanionsScreen
+import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
 import com.devautro.firebasechatapp.navigation.data.TabBarItem
 import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
 import com.devautro.firebasechatapp.profile.presentation.screens.ExitDialog
@@ -52,7 +56,9 @@ fun MainFunction(
     context: Context,
     lifecycleScope: LifecycleCoroutineScope,
     profileVm: ProfileViewModel,
-    usersVm: UsersScreenViewModel
+    usersVm: UsersScreenViewModel,
+    chatsHomeVm: ChatsHomeViewModel,
+    sharedVM: SharedChatViewModel
 ) {
     val profileTab = TabBarItem(
         title = stringResource(id = R.string.Profile),
@@ -213,7 +219,41 @@ fun MainFunction(
                         bottomNavPadding = bottomNavPadding
                     )
                 }
-                
+
+                composable(chatTab.title) {
+                    ChatsHome(
+                        onWindowClick = {
+                            navController.navigate("chatScreen")
+                        },
+                        onFloatingButtonClick = {
+                            navController.navigate("companionsList") {
+                                popUpTo("companionsList")
+                            }
+                        },
+                        vm = chatsHomeVm,
+                        sharedVM = sharedVM,
+                        bottomNavPadding = bottomNavPadding
+                    )
+                }
+
+                composable("chatScreen") {}
+
+                composable("companionsList") {
+                    CompanionsScreen(
+                        navigateBack = {
+                            navController.popBackStack()
+                        },
+                        navigateToChat = { navController.navigate("chatScreen") },
+                        openUsersScreen = {
+                            navController.navigate(usersTab.title) {
+                                popUpTo(usersTab.title)
+                            }
+                        },
+                        sharedVM = sharedVM,
+                        bottomNavPadding = bottomNavPadding
+                    )
+                }
+
             }
         }
 

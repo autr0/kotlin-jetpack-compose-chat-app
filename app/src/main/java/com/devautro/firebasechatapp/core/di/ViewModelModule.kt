@@ -1,6 +1,9 @@
 package com.devautro.firebasechatapp.core.di
 
 import android.content.Context
+import com.devautro.firebasechatapp.chatsHome.data.ChatsHomeRepository
+import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
+import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
 import com.devautro.firebasechatapp.users.data.UsersDataRepository
 import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
 import dagger.Module
@@ -17,10 +20,24 @@ object ViewModelModule {
     @Provides
     @ViewModelScoped
     fun provideUsersScreenViewModel(
-        usersDataRep: UsersDataRepository,
+        usersDataRepo: UsersDataRepository,
         @ApplicationContext context: Context
     ): UsersScreenViewModel {
-        return UsersScreenViewModel(usersDataRep, context)
+        return UsersScreenViewModel(usersDataRepo, context)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideChatsHomeViewModel(
+        chatsHomeRepo: ChatsHomeRepository
+    ): ChatsHomeViewModel {
+        return ChatsHomeViewModel(chatsHomeRepo)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideSharedChatViewModel(): SharedChatViewModel {
+        return SharedChatViewModel()
     }
 
 }
