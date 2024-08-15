@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.IntentSender
 import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.sign_in.data.model.SignInResult
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.data.model.UserData
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient

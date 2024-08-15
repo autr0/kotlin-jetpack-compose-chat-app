@@ -53,8 +53,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
-import com.devautro.firebasechatapp.core.utils.AutoResizedText
+import com.devautro.firebasechatapp.core.data.model.UserData
+import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

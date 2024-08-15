@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.core.utils.AutoResizedText
+import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)

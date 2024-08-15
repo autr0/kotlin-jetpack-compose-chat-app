@@ -1,6 +1,6 @@
 package com.devautro.firebasechatapp.users.data.model
 
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.data.model.UserData
 
 data class Request(
     val from: UserData? = null,

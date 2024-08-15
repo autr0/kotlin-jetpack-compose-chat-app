@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.core.utils.AutoResizedText
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.presentation.AutoResizedText
+import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.ui.theme.greenButton
 import com.devautro.firebasechatapp.ui.theme.redButton
 import com.devautro.firebasechatapp.users.data.model.Request

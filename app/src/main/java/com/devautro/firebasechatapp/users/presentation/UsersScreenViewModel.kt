@@ -5,7 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.users.data.UsersDataRepository
 import com.devautro.firebasechatapp.users.data.model.Request
 import com.devautro.firebasechatapp.users.data.model.UsersButtonState

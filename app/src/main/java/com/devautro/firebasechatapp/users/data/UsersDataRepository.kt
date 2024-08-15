@@ -3,7 +3,7 @@ package com.devautro.firebasechatapp.users.data
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.devautro.firebasechatapp.profile.data.model.ProfileData
-import com.devautro.firebasechatapp.sign_in.data.model.UserData
+import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.users.data.model.Request
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot

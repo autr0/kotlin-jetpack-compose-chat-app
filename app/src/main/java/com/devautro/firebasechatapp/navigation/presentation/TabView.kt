@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import com.devautro.firebasechatapp.core.utils.AutoResizedText
+import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 import com.devautro.firebasechatapp.navigation.data.TabBarItem
 
 // This is a wrapper view that allows us to easily and cleanly

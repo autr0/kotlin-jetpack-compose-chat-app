@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.sign_in.data.model
+package com.devautro.firebasechatapp.core.data.model
 
 data class UserData(
     val userId: String? = null,
