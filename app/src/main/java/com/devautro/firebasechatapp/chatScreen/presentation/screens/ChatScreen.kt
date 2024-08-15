@@ -67,7 +67,7 @@ import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
 import com.devautro.firebasechatapp.chatScreen.presentation.utils.rememberScrollContext
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
-import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
+import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -81,6 +81,10 @@ fun ChatScreen(
     sharedVM: SharedChatViewModel = viewModel()
 ) {
     val companion by sharedVM.companion.collectAsStateWithLifecycle()
+
+    val isOnlineState = vm.companionOnlineStatus.collectAsStateWithLifecycle()
+    val isOnline = remember { isOnlineState.value }
+    if (isOnlineState.value.isEmpty()) vm.getCompanionOnlineStatus(companion.userId ?: "")
 
     val dbMsgs = vm.msgsList.collectAsStateWithLifecycle()
     val messages = remember { dbMsgs.value }
@@ -120,8 +124,10 @@ fun ChatScreen(
     }
 
     BackHandler {
-        onIconCLick()
         if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+        vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
+        vm.resetMessagesLists()
+        onIconCLick()
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -165,7 +171,18 @@ fun ChatScreen(
                                 style = MaterialTheme.typography.displayMedium,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            /* TODO online status tracker should be here */
+                            if (isOnline.isNotEmpty() && isOnline[0]) {
+                                AutoResizedText(
+                                    text = stringResource(id = R.string.online),
+                                    style = MaterialTheme.typography.displaySmall
+                                )
+                            } else {
+                                AutoResizedText(
+                                    text = stringResource(id = R.string.offline),
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Color.LightGray
+                                )
+                            }
                         }
                     }
                 },
@@ -176,9 +193,11 @@ fun ChatScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            keyboardController?.hide() // close the keyboard
-                            onIconCLick.invoke()
                             if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+                            keyboardController?.hide() // close the keyboard
+                            vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
+                            vm.resetMessagesLists()
+                            onIconCLick.invoke()
                         }
                     ) {
                         Icon(

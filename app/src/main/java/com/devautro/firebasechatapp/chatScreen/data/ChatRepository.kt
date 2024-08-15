@@ -7,17 +7,17 @@ import com.devautro.firebasechatapp.core.data.dateTimeToLocalTimeZone
 import com.devautro.firebasechatapp.core.data.model.Message
 import com.devautro.firebasechatapp.core.data.model.MessageStatus
 import com.devautro.firebasechatapp.core.data.model.UserData
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import javax.inject.Inject
 
-class ChatRepository @Inject constructor() {
-    private val auth = Firebase.auth
-    private val database = Firebase.database
+class ChatRepository @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase
+) {
     private val messagesRef = database.getReference("messages")
     var currentUser = UserData(
         auth.currentUser?.uid,
@@ -76,7 +76,7 @@ class ChatRepository @Inject constructor() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("MyLog", "Failed to read value in 'getMessages': $error")
+                    Log.e("MyLog", "Failed to read value in 'getMessages': $error")
                 }
             })
 
@@ -171,6 +171,26 @@ class ChatRepository @Inject constructor() {
                 .removeValue()
         }
 
+    }
+
+    suspend fun getCompanionOnlineStatus(onlineState: SnapshotStateList<Boolean>, companionId: String) {
+        if (companionId.isNotEmpty()) {
+            onlineStateRef.child(companionId).addValueEventListener(
+                object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        onlineState.clear()
+                        val companionStatus = snapshot.getValue(Boolean::class.java)
+                        if (companionStatus != null && companionId.isNotEmpty()) {
+                            onlineState.add(companionStatus)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("MyLog", "Failed to read value in 'getCompanionOnlineStatus': $error")
+                    }
+                }
+            )
+        }
     }
 
 }

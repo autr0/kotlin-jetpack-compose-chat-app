@@ -36,14 +36,18 @@ class UsersScreenViewModel @Inject constructor(
 
 
     init {
-        getCompanions()
-        getUsersFromDB()
-        getOutgoingRequests()
-        getIncomingRequests()
+        if (usersDataRepo.currentUser.userId != null) {
+            updateCurrentUser()
+            getCompanions()
+            getUsersFromDB()
+            getOutgoingRequests()
+            getIncomingRequests()
 
-        if (!_usersList.value.contains(usersDataRepo.currentUser)) {
-            addUser()
+            if (!_usersList.value.contains(usersDataRepo.currentUser)) {
+                addUser()
+            }
         }
+
     }
 
     fun removeIncomingRequest(req: Request) {
@@ -155,10 +159,12 @@ class UsersScreenViewModel @Inject constructor(
         _outgoingRequestsList.update { SnapshotStateList<Request>() }
         _incomingRequestsList.update { SnapshotStateList<Request>() }
         _companionsList.update { SnapshotStateList<UserData>() }
-        getCompanions()
-        getUsersFromDB()
-        getOutgoingRequests()
-        getIncomingRequests()
+        if (usersDataRepo.currentUser.userId != null) {
+            getCompanions()
+            getUsersFromDB()
+            getOutgoingRequests()
+            getIncomingRequests()
+        }
     }
 
 }

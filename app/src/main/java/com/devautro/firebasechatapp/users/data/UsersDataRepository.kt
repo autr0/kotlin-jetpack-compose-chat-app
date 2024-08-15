@@ -5,21 +5,22 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.devautro.firebasechatapp.profile.data.model.ProfileData
 import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.users.data.model.Request
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import javax.inject.Inject
 
-class UsersDataRepository @Inject constructor() {
-    private val database = Firebase.database
+class UsersDataRepository @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase
+) {
     private val usersRef = database.getReference("users")
     private val requestsRef = database.getReference("requests")
     private val companionsRef = database.getReference("companions")
     private val profileRef = database.getReference("profile")
-    private val auth = Firebase.auth
+
     var currentUser = UserData(
         auth.currentUser?.uid,
         auth.currentUser?.displayName,
@@ -49,7 +50,7 @@ class UsersDataRepository @Inject constructor() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w("MyLog", "Failed to get users list: $error")
+                Log.e("MyLog", "Failed to get users list: $error")
             }
 
         })
@@ -110,7 +111,7 @@ class UsersDataRepository @Inject constructor() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("MyLog", "Failed to read value in incomingRequests: $error")
+                    Log.e("MyLog", "Failed to read value in incomingRequests: $error")
                 }
 
             }
@@ -139,7 +140,7 @@ class UsersDataRepository @Inject constructor() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("MyLog", "Failed to read value in outgoingRequests: $error")
+                    Log.e("MyLog", "Failed to read value in outgoingRequests: $error")
                 }
 
             }
@@ -159,7 +160,7 @@ class UsersDataRepository @Inject constructor() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("MyLog", "Failed to read value in 'getCompanions': $error")
+                    Log.e("MyLog", "Failed to read value in 'getCompanions': $error")
                 }
 
             }

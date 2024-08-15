@@ -1,4 +1,4 @@
-package com.devautro.firebasechatapp.core.presentation
+package com.devautro.firebasechatapp.core.presentation.viewModels
 
 import androidx.lifecycle.ViewModel
 import com.devautro.firebasechatapp.core.data.model.UserData

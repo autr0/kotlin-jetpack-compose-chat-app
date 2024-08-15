@@ -40,7 +40,8 @@ import com.devautro.firebasechatapp.chatScreen.presentation.screens.ChatScreen
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.chatsHome.presentation.screens.ChatsHome
 import com.devautro.firebasechatapp.chatsHome.presentation.screens.companionsScreen.CompanionsScreen
-import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
+import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
+import com.devautro.firebasechatapp.core.presentation.viewModels.OnlineTrackerViewModel
 import com.devautro.firebasechatapp.navigation.data.TabBarItem
 import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
 import com.devautro.firebasechatapp.profile.presentation.screens.ExitDialog
@@ -60,8 +61,9 @@ fun MainFunction(
     profileVm: ProfileViewModel,
     usersVm: UsersScreenViewModel,
     chatsHomeVm: ChatsHomeViewModel,
-    sharedVM: SharedChatViewModel,
-    chatScreenVM: ChatScreenViewModel
+    sharedVm: SharedChatViewModel,
+    chatScreenVm: ChatScreenViewModel,
+    onlineTrackVm: OnlineTrackerViewModel
 ) {
     val profileTab = TabBarItem(
         title = stringResource(id = R.string.Profile),
@@ -144,8 +146,18 @@ fun MainFunction(
                                 Toast.LENGTH_SHORT
                             ).show()
 
+                            profileVm.resetProfileVmState()
+                            usersVm.resetUsersState()
+                            chatsHomeVm.resetChatsHomeVmState()
+                            sharedVm.resetSharedVmState()
+                            chatScreenVm.resetChatState()
+
+                            onlineTrackVm.updateOnlineStatus(true)
+
                             navController.navigate(profileTab.title)
                             viewModel.resetState()
+
+
                         }
                     }
                     SignInScreen(
@@ -194,6 +206,9 @@ fun MainFunction(
                             dialogState = dialogState,
                             onSignOut = {
                                 lifecycleScope.launch {
+                                    // set user's status 'offline'
+                                    onlineTrackVm.updateOnlineStatus(false)
+
                                     googleAuthUIClient.signOut()
                                     Toast.makeText(
                                         context,
@@ -234,18 +249,18 @@ fun MainFunction(
                             }
                         },
                         vm = chatsHomeVm,
-                        sharedVM = sharedVM,
+                        sharedVM = sharedVm,
                         bottomNavPadding = bottomNavPadding
                     )
                 }
 
                 composable("chatScreen") {
                     ChatScreen(
-                        vm = chatScreenVM,
+                        vm = chatScreenVm,
                         onIconCLick = {
                             navController.popBackStack()
                         },
-                        sharedVM = sharedVM
+                        sharedVM = sharedVm
                     )
                 }
 
@@ -260,7 +275,7 @@ fun MainFunction(
                                 popUpTo(usersTab.title)
                             }
                         },
-                        sharedVM = sharedVM,
+                        sharedVM = sharedVm,
                         bottomNavPadding = bottomNavPadding
                     )
                 }

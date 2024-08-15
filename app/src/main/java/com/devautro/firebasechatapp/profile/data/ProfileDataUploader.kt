@@ -4,17 +4,18 @@ import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.devautro.firebasechatapp.profile.data.model.ProfileData
 import com.devautro.firebasechatapp.core.data.model.UserData
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import javax.inject.Inject
 
-class ProfileDataUploader {
-    private val database = Firebase.database
+class ProfileDataUploader @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val database: FirebaseDatabase
+) {
     private val profileRef = database.getReference("profile")
-    private val auth = Firebase.auth
     var currentUser = UserData(
         auth.currentUser?.uid,
         auth.currentUser?.displayName,
@@ -29,7 +30,6 @@ class ProfileDataUploader {
             user?.photoUrl.toString()
         )
     }
-
 
     suspend fun getProfileData(profileData: SnapshotStateMap<String, Int>) {
         profileRef.child(currentUser.userId!!).addValueEventListener(
@@ -46,7 +46,7 @@ class ProfileDataUploader {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("MyLog", "Failed to read value in getProfileData: $error")
+                    Log.e("MyLog", "Failed to read value in getProfileData: $error")
                 }
 
             }

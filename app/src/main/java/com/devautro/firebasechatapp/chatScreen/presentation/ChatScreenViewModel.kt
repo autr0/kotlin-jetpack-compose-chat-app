@@ -25,6 +25,9 @@ class ChatScreenViewModel @Inject constructor(
     private val _msgsDateList = MutableStateFlow(SnapshotStateList<MessagesDate>())
     val msgsDateList = _msgsDateList.asStateFlow()
 
+    private val _companionOnlineStatus = MutableStateFlow(SnapshotStateList<Boolean>())
+    val companionOnlineStatus = _companionOnlineStatus.asStateFlow()
+
 
     fun getMessages(companion: UserData) {
         viewModelScope.launch {
@@ -73,6 +76,21 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
+    fun resetMessagesLists() {
+        _msgsList.update { SnapshotStateList<Message>() }
+        _msgsDateList.update { SnapshotStateList<MessagesDate>() }
+    }
+
+    fun getCompanionOnlineStatus(companionId: String) {
+        viewModelScope.launch {
+            chatRepo.getCompanionOnlineStatus(_companionOnlineStatus.value, companionId)
+        }
+    }
+
+    fun resetCompanionOnlineStatus() {
+        _companionOnlineStatus.update { SnapshotStateList<Boolean>() }
+    }
+
     private fun updateCurrentUser() {
         viewModelScope.launch {
             chatRepo.updateCurrentUser()
@@ -81,8 +99,8 @@ class ChatScreenViewModel @Inject constructor(
 
     fun resetChatState() {
         updateCurrentUser()
-        _msgsList.update { SnapshotStateList<Message>() }
-        _msgsDateList.update { SnapshotStateList<MessagesDate>() }
+        resetMessagesLists()
+        resetCompanionOnlineStatus()
     }
 
 }

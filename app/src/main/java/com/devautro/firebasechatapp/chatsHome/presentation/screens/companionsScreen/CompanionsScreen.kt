@@ -61,7 +61,7 @@ import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
-import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
+import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

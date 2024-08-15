@@ -58,7 +58,7 @@ import com.devautro.firebasechatapp.chatsHome.data.model.ChatStatus
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.core.data.timeDateToLocalTimeZone
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
-import com.devautro.firebasechatapp.core.presentation.SharedChatViewModel
+import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

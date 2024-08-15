@@ -25,8 +25,10 @@ class ChatsHomeViewModel @Inject constructor(
     val chatsList: StateFlow<SnapshotStateList<ChatStatus>> = _chatsList
 
     init {
-        getCompanions()
-        getChats()
+        if (chatsHomeRepo.currentUser.userId != null) {
+            getCompanions()
+            getChats()
+        }
     }
 
     private fun getCompanions() {
@@ -75,8 +77,10 @@ class ChatsHomeViewModel @Inject constructor(
         updateCurrentUser()
         _companionsList.update { SnapshotStateList<UserData>() }
         _chatsList.update { SnapshotStateList<ChatStatus>() }
-        getCompanions()
-        getChats()
+        if (chatsHomeRepo.currentUser.userId != null) {
+            getCompanions()
+            getChats()
+        }
     }
 
 }
