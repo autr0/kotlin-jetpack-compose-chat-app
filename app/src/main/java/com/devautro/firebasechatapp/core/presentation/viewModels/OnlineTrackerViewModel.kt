@@ -22,6 +22,9 @@ class OnlineTrackerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 onlineStateRef.child(currentUserId).setValue(isOnline).await()
+
+//              that one below in case of Internet disconnection
+                onlineStateRef.child(currentUserId).onDisconnect().setValue(false).await()
             } catch (e: Exception) {
                 Log.e("MyLog", "Error updating online status: ${e.message}")
             }
