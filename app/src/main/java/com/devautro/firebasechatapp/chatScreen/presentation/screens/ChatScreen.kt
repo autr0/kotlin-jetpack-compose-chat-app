@@ -44,7 +44,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,10 +70,12 @@ import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
 import com.devautro.firebasechatapp.chatScreen.presentation.utils.rememberScrollContext
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
+import com.devautro.firebasechatapp.ui.theme.blueDone
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -102,10 +106,12 @@ fun ChatScreen(
 
     val keyboardHeight = WindowInsets.ime.getBottom(LocalDensity.current)
 
-    var previousTextFieldHeight by remember { mutableStateOf(0f) }
+    var previousTextFieldHeight by remember { mutableFloatStateOf(0f) }
     val textFieldSize = remember { mutableStateOf(Size.Zero) }
 
-    LaunchedEffect(key1 = listState.layoutInfo.totalItemsCount) {
+    val layoutInfo = remember { derivedStateOf { listState.layoutInfo } }
+
+    LaunchedEffect(key1 = layoutInfo.value.totalItemsCount) {
         if (listState.layoutInfo.totalItemsCount > 0) {
             listState.scrollToItem(listState.layoutInfo.totalItemsCount - 1)
         }
@@ -123,11 +129,40 @@ fun ChatScreen(
         previousTextFieldHeight = size.height
     }
 
+    val clickOnSearch = remember {
+        mutableStateOf(false)
+    }
+
+    val searchText by vm.searchText.collectAsStateWithLifecycle()
+    val matchingMessageIndices by vm.matchingMessageIndices.collectAsStateWithLifecycle()
+    val currentMatchIndex by vm.currentMatchIndex.collectAsStateWithLifecycle()
+    val matchMsgsSize by vm.matchingMessageCount.collectAsStateWithLifecycle()
+
+    val goToMessage = remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(goToMessage.value, currentMatchIndex) {
+        if (goToMessage.value && matchingMessageIndices.isNotEmpty()) {
+
+            val index = matchingMessageIndices.getOrNull(currentMatchIndex)
+            if (index != null) {
+                listState.animateScrollToItem(index)
+            }
+            goToMessage.value = false
+
+        }
+    }
+
     BackHandler {
-        if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
-        vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
-        vm.resetMessagesLists()
-        onIconCLick()
+        if (clickOnSearch.value) {
+            clickOnSearch.value = false
+        } else {
+            if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+            vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
+            vm.resetMessagesLists()
+            onIconCLick()
+        }
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -136,7 +171,7 @@ fun ChatScreen(
 
     val calendar = Calendar.getInstance().time
     val time = DateFormat.getPatternInstance(DateFormat.HOUR24_MINUTE).format(calendar)
-    val sdf = SimpleDateFormat("dd LLL yyyy")
+    val sdf = SimpleDateFormat("dd LLL yyyy", Locale.getDefault())
     val date = sdf.format(calendar).toString()
     val currentDateTime = LocalDateTime.now()
     // Transform current time and date into string with format ISO 8601
@@ -147,130 +182,144 @@ fun ChatScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (companion.profilePictureUrl != null) {
-                            AsyncImage(
-                                modifier = Modifier
-                                    .clip(CircleShape),
-                                model = companion.profilePictureUrl,
-                                contentDescription = "companion picture"
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Rounded.AccountCircle,
-                                contentDescription = "nullCaseImage",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(verticalArrangement = Arrangement.Center) {
-                            AutoResizedText(
-                                text = companion.username
-                                    ?: stringResource(id = R.string.unknown_user),
-                                style = MaterialTheme.typography.displayMedium,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            if (isOnline.isNotEmpty() && isOnline[0]) {
-                                AutoResizedText(
-                                    text = stringResource(id = R.string.online),
-                                    style = MaterialTheme.typography.displaySmall
+            if (clickOnSearch.value) {
+                SearchTopBar(
+                    clickOnSearch,
+                    searchText,
+                    vm,
+                    goToMessage
+                ) { keyboardController?.hide() }
+            } else {
+                TopAppBar(
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (companion.profilePictureUrl != null) {
+                                AsyncImage(
+                                    modifier = Modifier
+                                        .clip(CircleShape),
+                                    model = companion.profilePictureUrl,
+                                    contentDescription = "companion picture"
                                 )
                             } else {
-                                AutoResizedText(
-                                    text = stringResource(id = R.string.offline),
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Color.LightGray
+                                Icon(
+                                    imageVector = Icons.Rounded.AccountCircle,
+                                    contentDescription = "nullCaseImage",
+                                    modifier = Modifier
+                                        .clip(CircleShape)
                                 )
                             }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(verticalArrangement = Arrangement.Center) {
+                                AutoResizedText(
+                                    text = companion.username
+                                        ?: stringResource(id = R.string.unknown_user),
+                                    style = MaterialTheme.typography.displayMedium,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (isOnline.isNotEmpty() && isOnline[0]) {
+                                    AutoResizedText(
+                                        text = stringResource(id = R.string.online),
+                                        style = MaterialTheme.typography.displaySmall
+                                    )
+                                } else {
+                                    AutoResizedText(
+                                        text = stringResource(id = R.string.offline),
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = Color.LightGray
+                                    )
+                                }
+                            }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                ),
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
-                            keyboardController?.hide() // close the keyboard
-                            vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
-                            vm.resetMessagesLists()
-                            onIconCLick.invoke()
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = Color.White
+                    ),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+                                keyboardController?.hide() // close the keyboard
+                                vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
+                                vm.resetMessagesLists()
+                                onIconCLick.invoke()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                tint = Color.White,
+                                contentDescription = "arrow back"
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            tint = Color.White,
-                            contentDescription = "arrow back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = { /* TODO search message implementation */ }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            tint = Color.White,
-                            contentDescription = "search"
-                        )
-                    }
-                },
-            )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { clickOnSearch.value = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                tint = Color.White,
+                                contentDescription = "search"
+                            )
+                        }
+                    },
+                )
+            }
         },
         bottomBar = {
-            TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .imePadding() // new line
-                    .onGloballyPositioned {
-                        textFieldSize.value = Size(
-                            width = it.size.width.toFloat(),
-                            height = it.size.height.toFloat()
-                        )
-                    },
-                placeholder = { Text(text = stringResource(id = R.string.enter_msg_placeholder)) },
-                colors = TextFieldDefaults.colors(
-                    focusedLabelColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                maxLines = 4,
-                trailingIcon = {
-                    IconButton(
-                        modifier = Modifier.padding(end = 4.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        enabled = inputText.isNotEmpty() && inputText.isNotBlank(),
-                        onClick = {
-                            vm.addNewMessage(
-                                userData = companion,
-                                msg = inputText,
-                                time = time,
-                                date = date,
-                                dateTime = timeDate
+            if (clickOnSearch.value) {
+                SearchBottomBar(matchMsgsSize, currentMatchIndex, goToMessage, vm)
+            } else {
+                TextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .imePadding() // new line
+                        .onGloballyPositioned {
+                            textFieldSize.value = Size(
+                                width = it.size.width.toFloat(),
+                                height = it.size.height.toFloat()
                             )
-                            inputText = ""
-                            if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+                        },
+                    placeholder = { Text(text = stringResource(id = R.string.enter_msg_placeholder)) },
+                    colors = TextFieldDefaults.colors(
+                        focusedLabelColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        cursorColor = blueDone
+                    ),
+                    maxLines = 4,
+                    trailingIcon = {
+                        IconButton(
+                            modifier = Modifier.padding(end = 4.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            enabled = inputText.isNotEmpty() && inputText.isNotBlank(),
+                            onClick = {
+                                vm.addNewMessage(
+                                    userData = companion,
+                                    msg = inputText,
+                                    time = time,
+                                    date = date,
+                                    dateTime = timeDate
+                                )
+                                inputText = ""
+                                if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                contentDescription = "sendButton",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Send,
-                            contentDescription = "sendButton",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                },
-            )
+                    },
+                )
+            }
         },
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
@@ -302,6 +351,7 @@ fun ChatScreen(
                         if (firstUnreadMessage != null && msg == firstUnreadMessage) {
                             NewMessagesText()
                         }
+
                         if (msg.nameFrom == vm.chatRepo.currentUser.username) {
                             CurrentUserMessageBox(
                                 msg = msg,
@@ -313,12 +363,13 @@ fun ChatScreen(
                                         key = msg.id!!,
                                         remove = checkedState.value
                                     )
-                                }
+                                },
+                                vm = vm
                             )
                         } else {
                             CompanionMessageBox(
                                 msg = msg,
-                                companionName = companion.username ?: "null" ,
+                                companionName = companion.username ?: "null",
                                 checkedState = checkedState,
                                 remove = {
                                     vm.deleteMessage(
@@ -326,7 +377,8 @@ fun ChatScreen(
                                         key = msg.id!!,
                                         remove = checkedState.value
                                     )
-                                }
+                                },
+                                vm = vm
                             )
                         }
                     }

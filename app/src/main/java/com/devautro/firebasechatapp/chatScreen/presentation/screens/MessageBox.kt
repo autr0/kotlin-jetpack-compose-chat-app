@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devautro.firebasechatapp.R
+import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
 import com.devautro.firebasechatapp.core.data.model.Message
 import com.devautro.firebasechatapp.ui.theme.blueDone
 
@@ -39,7 +40,8 @@ fun CurrentUserMessageBox(
     msg: Message,
     companionName: String,
     checkedState: MutableState<Boolean>,
-    remove: () -> Unit
+    remove: () -> Unit,
+    vm: ChatScreenViewModel
 ) {
     val deleteState = remember {
         mutableStateOf(false)
@@ -68,7 +70,15 @@ fun CurrentUserMessageBox(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (vm.shouldPink(msg.message!!) && !isSystemInDarkTheme()) {
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
+                } else if (vm.shouldPink(msg.message) && isSystemInDarkTheme()) {
+                    MaterialTheme.colorScheme.tertiary
+                } else Color.Unspecified
+            ),
         horizontalAlignment = Alignment.End
     ) {
         Card(
@@ -106,7 +116,7 @@ fun CurrentUserMessageBox(
             ) {
                 Text(
                     color = Color.White,
-                    text = msg.message ?: stringResource(id = R.string.smthng_wrong)
+                    text = msg.message
                 )
                 Row(
                     modifier = Modifier.align(Alignment.Bottom),
@@ -155,7 +165,8 @@ fun CompanionMessageBox(
     msg: Message,
     companionName: String,
     checkedState: MutableState<Boolean>,
-    remove: () -> Unit
+    remove: () -> Unit,
+    vm: ChatScreenViewModel
 ) {
     val deleteState = remember {
         mutableStateOf(false)
@@ -184,7 +195,15 @@ fun CompanionMessageBox(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (vm.shouldPink(msg.message!!) && !isSystemInDarkTheme()) {
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
+                } else if (vm.shouldPink(msg.message) && isSystemInDarkTheme()) {
+                    MaterialTheme.colorScheme.tertiary
+                } else Color.Unspecified
+            ),
         horizontalAlignment = Alignment.Start
     ) {
         Card(
@@ -223,7 +242,7 @@ fun CompanionMessageBox(
             ) {
                 Text(
                     color = Color.White,
-                    text = msg.message ?: stringResource(id = R.string.smthng_wrong)
+                    text = msg.message
                 )
                 Row(
                     modifier = Modifier.align(Alignment.Bottom),
