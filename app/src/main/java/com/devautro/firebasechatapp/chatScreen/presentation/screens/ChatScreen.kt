@@ -143,6 +143,8 @@ fun ChatScreen(
     val formatter = DateTimeFormatter.ISO_DATE_TIME
     val timeDate = currentDateTime.atZone(ZoneId.systemDefault()).format(formatter)
 
+    val checkedState = remember { mutableStateOf(true) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -301,9 +303,31 @@ fun ChatScreen(
                             NewMessagesText()
                         }
                         if (msg.nameFrom == vm.chatRepo.currentUser.username) {
-                            CurrentUserMessageBox(msg = msg)
+                            CurrentUserMessageBox(
+                                msg = msg,
+                                companionName = companion.username ?: "null",
+                                checkedState = checkedState,
+                                remove = {
+                                    vm.deleteMessage(
+                                        companion = companion,
+                                        key = msg.id!!,
+                                        remove = checkedState.value
+                                    )
+                                }
+                            )
                         } else {
-                            CompanionMessageBox(msg = msg)
+                            CompanionMessageBox(
+                                msg = msg,
+                                companionName = companion.username ?: "null" ,
+                                checkedState = checkedState,
+                                remove = {
+                                    vm.deleteMessage(
+                                        companion = companion,
+                                        key = msg.id!!,
+                                        remove = checkedState.value
+                                    )
+                                }
+                            )
                         }
                     }
                 }

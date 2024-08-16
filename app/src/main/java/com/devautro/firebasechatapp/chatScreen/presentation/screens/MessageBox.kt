@@ -30,13 +30,43 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devautro.firebasechatapp.R
-import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
 import com.devautro.firebasechatapp.core.data.model.Message
 import com.devautro.firebasechatapp.ui.theme.blueDone
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CurrentUserMessageBox(msg: Message) {
+fun CurrentUserMessageBox(
+    msg: Message,
+    companionName: String,
+    checkedState: MutableState<Boolean>,
+    remove: () -> Unit
+) {
+    val deleteState = remember {
+        mutableStateOf(false)
+    }
+
+    if (deleteState.value) {
+        DeleteDialog(
+            deleteState = deleteState,
+            companionName = companionName,
+            checkedState = checkedState,
+            removeMessage = remove
+        )
+    }
+
+    val openState = remember {
+        mutableStateOf(false)
+    }
+
+    if (openState.value) {
+        MessageEditDialog(
+            openState = openState,
+            msg = msg.message ?: stringResource(id = R.string.smthng_wrong),
+            drawEditField = true,
+            deleteState = deleteState
+        )
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.End
@@ -50,7 +80,7 @@ fun CurrentUserMessageBox(msg: Message) {
                     bottom = 3.dp
                 )
                 .clickable {
-                    /* TODO onMessageDialog implementation */
+                    openState.value = true
                 },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -121,7 +151,38 @@ fun CurrentUserMessageBox(msg: Message) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CompanionMessageBox(msg: Message) {
+fun CompanionMessageBox(
+    msg: Message,
+    companionName: String,
+    checkedState: MutableState<Boolean>,
+    remove: () -> Unit
+) {
+    val deleteState = remember {
+        mutableStateOf(false)
+    }
+
+    if (deleteState.value) {
+        DeleteDialog(
+            deleteState = deleteState,
+            companionName = companionName,
+            checkedState = checkedState,
+            removeMessage = remove
+        )
+    }
+
+    val openState = remember {
+        mutableStateOf(false)
+    }
+
+    if (openState.value) {
+        MessageEditDialog(
+            openState = openState,
+            msg = msg.message ?: stringResource(id = R.string.smthng_wrong),
+            drawEditField = false,
+            deleteState = deleteState
+        )
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
@@ -135,7 +196,7 @@ fun CompanionMessageBox(msg: Message) {
                     bottom = 3.dp
                 )
                 .clickable {
-                    /* TODO onMessageDialog implementation */
+                    openState.value = true
                 },
             colors = CardDefaults.cardColors(
                 containerColor = if (isSystemInDarkTheme()) {
