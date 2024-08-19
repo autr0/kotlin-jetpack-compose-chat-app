@@ -1,7 +1,5 @@
 package com.devautro.firebasechatapp.chatsHome.presentation.screens.companionsScreen
 
-import android.icu.text.DateFormat
-import android.icu.util.Calendar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,10 +32,6 @@ import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
 import com.devautro.firebasechatapp.core.data.model.UserData
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun MessageDialog(
@@ -45,16 +39,6 @@ fun MessageDialog(
     userData: UserData,
     vm: ChatsHomeViewModel
 ) {
-    val calendar = Calendar.getInstance().time
-    val time = DateFormat.getPatternInstance(DateFormat.HOUR24_MINUTE).format(calendar)
-    val sdf = SimpleDateFormat("dd LLL yyyy")
-    val date = sdf.format(calendar).toString()
-
-    val currentDateTime = LocalDateTime.now()
-    // Transform current time and date into string with format ISO 8601
-    val formatter = DateTimeFormatter.ISO_DATE_TIME
-    val timeDate = currentDateTime.atZone(ZoneId.systemDefault()).format(formatter)
-
     var inputText by remember { mutableStateOf("") }
 
     Dialog(
@@ -114,10 +98,7 @@ fun MessageDialog(
                         onClick = {
                             vm.createChatStatus(
                                 userData = userData,
-                                message = inputText,
-                                dateTime = timeDate,
-                                time = time,
-                                date = date
+                                message = inputText
                             )
 
                             inputText = ""

@@ -1,7 +1,6 @@
 package com.devautro.firebasechatapp.chatsHome.presentation.screens
 
 import android.content.res.Configuration
-import android.icu.util.Calendar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,12 +55,8 @@ import coil.compose.AsyncImage
 import com.devautro.firebasechatapp.R
 import com.devautro.firebasechatapp.chatsHome.data.model.ChatStatus
 import com.devautro.firebasechatapp.chatsHome.presentation.ChatsHomeViewModel
-import com.devautro.firebasechatapp.core.data.timeDateToLocalTimeZone
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,18 +67,7 @@ fun ChatsHome(
     sharedVM: SharedChatViewModel = viewModel(),
     bottomNavPadding: PaddingValues
 ) {
-
-    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
-    val currentDateTime = LocalDateTime.now()
-
-    val dbChats = vm.chatsList.collectAsStateWithLifecycle()
-    val chatsList = remember { dbChats.value }
-
-    val sortedChatsList = chatsList.sortedByDescending { chatStatus ->
-        timeDateToLocalTimeZone(
-            chatStatus.lastMessage?.dateTime ?: currentDateTime.format(dateTimeFormatter)
-        )
-    }
+    val sortedChatsList by vm.chatsList.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -111,7 +95,7 @@ fun ChatsHome(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { innerPadding ->
-        if (chatsList.isEmpty()) {
+        if (sortedChatsList.isEmpty()) {
             val configuration = LocalConfiguration.current
             val isLandScape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             if (isLandScape) {
@@ -171,6 +155,7 @@ fun ChatsHome(
                             chatStatus = chatStatus,
                             onClick = { onWindowClick() },
                             updateLastMessage = { vm.updateLastMessage(chatStatus.companion) },
+                            today = vm.calculateTodayDate(),
                             sharedVM = sharedVM
                         )
                     }
@@ -185,15 +170,12 @@ fun ChatWindow(
     chatStatus: ChatStatus,
     onClick: () -> Unit,
     updateLastMessage: () -> Unit,
+    today: String,
     sharedVM: SharedChatViewModel = viewModel()
 ) {
     LaunchedEffect(key1 = Unit) {
         updateLastMessage.invoke()
     }
-
-    val calendar = Calendar.getInstance().time
-    val sdf = SimpleDateFormat("dd LLL yyyy")
-    val today = sdf.format(calendar).toString()
 
     val userData = chatStatus.companion!!
     Card(

@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -115,8 +116,10 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .consumeWindowInsets(innerPadding)
-                .padding(top = innerPadding.calculateTopPadding(),
-                    bottom = bottomNavPadding.calculateBottomPadding())
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = bottomNavPadding.calculateBottomPadding()
+                )
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally

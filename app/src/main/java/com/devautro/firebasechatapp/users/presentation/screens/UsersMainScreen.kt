@@ -33,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +52,7 @@ import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
 
 @Composable
 fun UsersMainScreen(
-    allUsersList: SnapshotStateList<UserData>,
-    openChat: () -> Unit,
+    allUsersList: List<UserData>,
     vm: UsersScreenViewModel,
     bottomNavPadding: PaddingValues
 ) {
@@ -89,8 +87,7 @@ fun UsersMainScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Spacer(modifier = Modifier.height(100.dp))
             }
-        }
-        else {
+        } else {
             Column(
                 modifier = Modifier
                     .padding(bottom = bottomNavPadding.calculateBottomPadding())
@@ -119,13 +116,13 @@ fun UsersMainScreen(
         }
     } else {
         LazyColumn(
-            Modifier.fillMaxSize()
+            Modifier
+                .fillMaxSize()
                 .padding(bottom = bottomNavPadding.calculateBottomPadding())
         ) {
             itemsIndexed(allUsersList) { index, userData ->
                 UserCardSecond(
                     userData = userData,
-                    openChat = openChat,
                     vm = vm
                 )
                 if (index != allUsersList.lastIndex) {
@@ -144,10 +141,9 @@ fun UsersMainScreen(
 @Composable
 fun UserCardSecond(
     userData: UserData,
-    openChat: () -> Unit,
     vm: UsersScreenViewModel = hiltViewModel()
 ) {
-    val bState = vm.getButtonState(userData) // CHECK THIS OUT!
+    val bState = vm.getButtonState(userData)
 
     var bText by remember { mutableStateOf(bState.bText) }
     var isEnabled by remember { mutableStateOf(bState.isEnabled) }
@@ -204,14 +200,9 @@ fun UserCardSecond(
                 } else MaterialTheme.colorScheme.tertiary
             ),
             onClick = {
-                if (bText == vm.context.getString(R.string.button_open_chat)) {
-                    openChat()
-                } else {
-                    vm.sendRequest(userData)
-                    isEnabled = false
-                    bText = vm.context.getString(R.string.button_sent)
-                }
-
+                vm.sendRequest(userData)
+                isEnabled = false
+                bText = vm.context.getString(R.string.button_sent)
             },
             enabled = isEnabled
         ) {

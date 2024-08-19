@@ -1,7 +1,6 @@
 package com.devautro.firebasechatapp.profile.data
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.devautro.firebasechatapp.profile.data.model.ProfileData
 import com.devautro.firebasechatapp.core.data.model.UserData
 import com.google.firebase.auth.FirebaseAuth
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 class ProfileDataUploader @Inject constructor(
     private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    database: FirebaseDatabase
 ) {
     private val profileRef = database.getReference("profile")
     var currentUser = UserData(
@@ -31,11 +30,11 @@ class ProfileDataUploader @Inject constructor(
         )
     }
 
-    suspend fun getProfileData(profileData: SnapshotStateMap<String, Int>) {
+    fun getProfileData(onProfileDataReceived: (Map<String, Int>) -> Unit) {
         profileRef.child(currentUser.userId!!).addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    profileData.clear()
+                    val profileData = mutableMapOf<String, Int>()
                     for (s in snapshot.children) {
                         val profile = s.getValue(ProfileData::class.java)
                         if (profile?.name != null && profile.size != null) {
@@ -43,6 +42,7 @@ class ProfileDataUploader @Inject constructor(
                         }
 
                     }
+                    onProfileDataReceived(profileData)
                 }
 
                 override fun onCancelled(error: DatabaseError) {

@@ -1,7 +1,6 @@
 package com.devautro.firebasechatapp.chatsHome.data
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.devautro.firebasechatapp.chatsHome.data.model.ChatStatus
 import com.devautro.firebasechatapp.core.data.dateTimeToLocalTimeZone
 import com.devautro.firebasechatapp.core.data.model.Message
@@ -13,11 +12,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ChatsHomeRepository @Inject constructor(
     private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    database: FirebaseDatabase
 ) {
     private val companionsRef = database.getReference("companions")
     private val chatsRef = database.getReference("chats")
@@ -38,17 +41,21 @@ class ChatsHomeRepository @Inject constructor(
         )
     }
 
-    suspend fun getCompanions(companionsList: SnapshotStateList<UserData>) {
+    fun getCompanions(onCompanionsReceived: (List<UserData>) -> Unit) {
         companionsRef.child(currentUser.userId!!).addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    val companionsList = mutableListOf<UserData>()
                     for (s in snapshot.children) {
                         val companion = s.getValue(UserData::class.java)
                         if (companion != null && !companionsList.contains(companion)) {
                             companionsList.add(companion)
                         }
                     }
-//                      add companions size:
+
+                    onCompanionsReceived(companionsList)
+
+//                  add companions size:
                     profileRef.child("${ currentUser.userId }").child("companionsSize")
                         .setValue(
                             ProfileData(
@@ -66,12 +73,11 @@ class ChatsHomeRepository @Inject constructor(
         )
     }
 
-    suspend fun getHomeChats(chatsList: SnapshotStateList<ChatStatus>) {
+    fun getHomeChats(onChatsReceived: (List<ChatStatus>) -> Unit) {
         chatsRef.child(currentUser.userId!!).addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    chatsList.clear()
-
+                    val chatsList = mutableListOf<ChatStatus>()
                     for (s in snapshot.children) {
                         val chatStatus = s.getValue(ChatStatus::class.java)
                         if (chatStatus?.lastMessage?.dateTime != null &&
@@ -89,7 +95,9 @@ class ChatsHomeRepository @Inject constructor(
                         }
                     }
 
-//                      get chats size:
+                    onChatsReceived(chatsList)
+
+//                  get chats size:
                     profileRef.child("${ currentUser.userId }").child("chatsSize")
                         .setValue(
                             ProfileData(
@@ -113,122 +121,139 @@ class ChatsHomeRepository @Inject constructor(
         dateTime: String,
         time: String,
         date: String
-    ) {
-        val key = messagesRef.push().key
+    ) = coroutineScope {
+        val key = messagesRef.push().key ?: return@coroutineScope
 
-//          Create chats branch for user_1 (userFrom)
-        chatsRef.child("${companion.userId}")
-            .child("${companion.username}_${currentUser.username}")
-            .setValue(
-                ChatStatus(
-                    currentUser = companion, // 'cause he receive it as 'currentUser'
-                    companion = currentUser,
-                    lastMessage = Message(
-                        nameFrom = currentUser.username,
-                        message = message,
-                        status = MessageStatus(received = true),
-                        timeSent = time,
-                        date = date,
-                        dateTime = dateTime,
-                        id = key
-                    )
-                )
+        try {
+            val messageData = Message(
+                nameFrom = currentUser.username,
+                message = message,
+                status = MessageStatus(received = true),
+                timeSent = time,
+                date = date,
+                dateTime = dateTime,
+                id = key
             )
 
+//          Create chats branch for user_1 (userFrom)
+            val createUserFromChatBranch = async {
+                createChatsBranch(
+                    currentUser = companion,    // 'cause he receive it as 'currentUser'
+                    companion = currentUser,
+                    lastMessage = messageData
+                )
+            }
+
 //          Create chats branch for user_2 (userTo)
+            val createUserToChatBranch = async {
+                createChatsBranch(
+                    currentUser = currentUser,
+                    companion = companion,
+                    lastMessage = messageData
+                )
+            }
+
+            awaitAll(createUserFromChatBranch, createUserToChatBranch)
+
+//          Create msgs branch for currentUser
+            val createCurrentUserMessagesBranch = async {
+                createMessagesBranch(
+                    currentUser = currentUser,
+                    companion = companion,
+                    key = key,
+                    message = messageData
+                )
+            }
+
+//          Create msgs branch for companion
+            val createCompanionMessagesBranch = async {
+                createMessagesBranch(
+                    currentUser = companion,
+                    companion = currentUser,
+                    key = key,
+                    message = messageData
+                )
+            }
+
+            awaitAll(createCurrentUserMessagesBranch, createCompanionMessagesBranch)
+        } catch (e: Exception) {
+            Log.e("MyLog", "Failed to create a chat: ${e.message}")
+        }
+
+    }
+
+    private suspend fun createChatsBranch(
+        currentUser: UserData,
+        companion: UserData,
+        lastMessage: Message
+    ) {
         chatsRef.child("${currentUser.userId}")
             .child("${currentUser.username}_${companion.username}")
             .setValue(
                 ChatStatus(
                     currentUser = currentUser,
                     companion = companion,
-                    lastMessage = Message(
-                        nameFrom = currentUser.username,
-                        message = message,
-                        status = MessageStatus(received = true),
-                        timeSent = time,
-                        date = date,
-                        dateTime = dateTime,
-                        id = key
-                    )
+                    lastMessage = lastMessage
                 )
-            )
-
-
-//          Create msgs branch for currentUser
-        messagesRef.child("${currentUser.userId}")
-            .child("${currentUser.username}_${companion.username}")
-            .child(key ?: "unknown message")
-            .setValue(
-                Message(
-                    nameFrom = currentUser.username,
-                    message = message,
-                    status = MessageStatus(received = true),
-                    timeSent = time,
-                    date = date,
-                    dateTime = dateTime,
-                    id = key
-                )
-            )
-
-//          Create msgs branch for companion
-        messagesRef.child("${companion.userId}")
-            .child("${companion.username}_${currentUser.username}")
-            .child(key ?: "unknown message")
-            .setValue(
-                Message(
-                    nameFrom = currentUser.username,
-                    message = message,
-                    status = MessageStatus(received = true),
-                    timeSent = time,
-                    date = date,
-                    dateTime = dateTime,
-                    id = key
-                )
-            )
-
-
+            ).await()
     }
 
-    suspend fun updateLastMessage(companion: UserData) {
+    private suspend fun createMessagesBranch(
+        currentUser: UserData,
+        companion: UserData,
+        key: String,
+        message: Message
+    ) {
+        messagesRef.child("${currentUser.userId}")
+            .child("${currentUser.username}_${companion.username}")
+            .child(key)
+            .setValue(message)
+            .await()
+    }
+
+
+    fun updateLastMessage(companion: UserData) {
         messagesRef.child("${currentUser.userId}")
             .child("${currentUser.username}_${companion.username}")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val lastSnapshot = snapshot.children.lastOrNull()
-                    if (lastSnapshot != null) {
-                        val lastMsg = lastSnapshot.getValue(Message::class.java)
-
-
-                        if (lastMsg != null) {
-                            val updateCurrentUserChat = hashMapOf<String, Any>(
-                                "${currentUser.username}_${companion.username}" to
-                                        ChatStatus(
-                                            currentUser = currentUser,
-                                            companion = companion,
-                                            lastMessage = lastMsg
-                                        )
-                            )
-                            chatsRef.child(currentUser.userId!!)
-                                .updateChildren(updateCurrentUserChat)
-
-                            val updateCompanionChat = hashMapOf<String, Any>(
-                                "${companion.username}_${currentUser.username}" to
-                                        ChatStatus(
-                                            currentUser = companion,
-                                            companion = currentUser,
-                                            lastMessage = lastMsg
-                                        )
-                            )
-                            chatsRef.child(companion.userId!!).updateChildren(updateCompanionChat)
-                        }
+                    snapshot.children.lastOrNull()?.getValue(Message::class.java)?.let { lastMsg ->
+                        updateChat(
+                            currentUser = currentUser,
+                            companion = companion,
+                            lastMessage = lastMsg
+                        )
+                        updateChat(
+                            currentUser = companion,
+                            companion = currentUser,
+                            lastMessage = lastMsg
+                        )
                     }
+
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("MyLog", "Failed to read value in 'updateLastMessage': $error")
                 }
             })
+    }
+
+    private fun updateChat(
+        currentUser: UserData,
+        companion: UserData,
+        lastMessage: Message
+    ) {
+        val chatStatus = ChatStatus(
+            currentUser = currentUser,
+            companion = companion,
+            lastMessage = lastMessage
+        )
+
+        val updateCurrentUserChat = hashMapOf<String, Any>(
+            "${currentUser.username}_${companion.username}" to chatStatus
+        )
+
+        chatsRef.child(currentUser.userId!!).updateChildren(updateCurrentUserChat)
     }
 
 }

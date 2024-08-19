@@ -45,13 +45,11 @@ fun UsersScreen(
     vm: UsersScreenViewModel = hiltViewModel(),
     bottomNavPadding: PaddingValues
 ) {
-    val dbUsers = vm.usersList.collectAsStateWithLifecycle()
-    val users = remember { dbUsers.value }
+    val users by vm.usersList.collectAsStateWithLifecycle()
 
-    val dbOutgoingReqs = vm.outgoingRequestsList.collectAsStateWithLifecycle()
-    val outgoingRequests = remember { dbOutgoingReqs.value }
+    val outgoingRequests by vm.outgoingRequestsList.collectAsStateWithLifecycle()
 
-    val incomingRequests by remember { vm.incomingRequestsList }.collectAsStateWithLifecycle()
+    val incomingRequests by vm.incomingRequestsList.collectAsStateWithLifecycle()
 
     val tabItems = listOf(
         stringResource(id = R.string.Users),
@@ -149,7 +147,6 @@ fun UsersScreen(
                     0 -> {
                         UsersMainScreen(
                             allUsersList = users,
-                            openChat = {/*TODO OPEN CHAT WITH CERTAIN USER*/ },
                             vm = vm,
                             bottomNavPadding = bottomNavPadding
                         )

@@ -1,7 +1,6 @@
 package com.devautro.firebasechatapp.users.presentation
 
 import android.content.Context
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devautro.firebasechatapp.R
@@ -23,16 +22,16 @@ class UsersScreenViewModel @Inject constructor(
     @ApplicationContext val context: Context
 )  : ViewModel() {
 
-    private val _usersList = MutableStateFlow(SnapshotStateList<UserData>())
+    private val _usersList = MutableStateFlow(listOf<UserData>())
     val usersList = _usersList.asStateFlow()
 
-    private val _outgoingRequestsList = MutableStateFlow(SnapshotStateList<Request>())
+    private val _outgoingRequestsList = MutableStateFlow(mutableListOf<Request>())
     val outgoingRequestsList = _outgoingRequestsList.asStateFlow()
 
-    private val _incomingRequestsList = MutableStateFlow(SnapshotStateList<Request>())
+    private val _incomingRequestsList = MutableStateFlow(mutableListOf<Request>())
     val incomingRequestsList = _incomingRequestsList.asStateFlow()
 
-    private val _companionsList = MutableStateFlow(SnapshotStateList<UserData>())
+    private val _companionsList = MutableStateFlow(listOf<UserData>())
 
 
     init {
@@ -95,7 +94,9 @@ class UsersScreenViewModel @Inject constructor(
 
     private fun getUsersFromDB() {
         viewModelScope.launch {
-            usersDataRepo.getUsersFromDB(_usersList.value)
+            usersDataRepo.getUsersFromDB { dbUsersList ->
+                _usersList.value = dbUsersList
+            }
         }
     }
 
@@ -108,20 +109,26 @@ class UsersScreenViewModel @Inject constructor(
 
     private fun getOutgoingRequests() {
         viewModelScope.launch {
-            usersDataRepo.getOutgoingRequests(_outgoingRequestsList.value)
+            usersDataRepo.getOutgoingRequests{ outgoingRequests ->
+                _outgoingRequestsList.value = outgoingRequests
+            }
 
         }
     }
 
     private fun getIncomingRequests() {
         viewModelScope.launch {
-            usersDataRepo.getIncomingRequests(_incomingRequestsList.value)
+            usersDataRepo.getIncomingRequests{ incomingRequest ->
+                _incomingRequestsList.value = incomingRequest
+            }
         }
     }
 
     private fun getCompanions() {
         viewModelScope.launch {
-            usersDataRepo.getCompanions(_companionsList.value)
+            usersDataRepo.getCompanions{ companions ->
+                _companionsList.value = companions
+            }
         }
     }
 
@@ -155,10 +162,10 @@ class UsersScreenViewModel @Inject constructor(
 
     fun resetUsersState() {
         updateCurrentUser()
-        _usersList.update { SnapshotStateList<UserData>() }
-        _outgoingRequestsList.update { SnapshotStateList<Request>() }
-        _incomingRequestsList.update { SnapshotStateList<Request>() }
-        _companionsList.update { SnapshotStateList<UserData>() }
+        _usersList.update { listOf() }
+        _outgoingRequestsList.update { mutableListOf() }
+        _incomingRequestsList.update { mutableListOf() }
+        _companionsList.update { listOf() }
         if (usersDataRepo.currentUser.userId != null) {
             getCompanions()
             getUsersFromDB()

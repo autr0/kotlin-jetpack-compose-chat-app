@@ -1,7 +1,5 @@
 package com.devautro.firebasechatapp.chatScreen.presentation.screens
 
-import android.icu.text.DateFormat
-import android.icu.util.Calendar
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -71,11 +69,6 @@ import com.devautro.firebasechatapp.chatScreen.presentation.utils.rememberScroll
 import com.devautro.firebasechatapp.core.presentation.AutoResizedText
 import com.devautro.firebasechatapp.core.presentation.viewModels.SharedChatViewModel
 import com.devautro.firebasechatapp.ui.theme.blueDone
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -86,22 +79,21 @@ fun ChatScreen(
 ) {
     val companion by sharedVM.companion.collectAsStateWithLifecycle()
 
-    val isOnlineState = vm.companionOnlineStatus.collectAsStateWithLifecycle()
-    val isOnline = remember { isOnlineState.value }
-    if (isOnlineState.value.isEmpty()) vm.getCompanionOnlineStatus(companion.userId ?: "")
+    val isOnline by vm.companionOnlineStatus.collectAsStateWithLifecycle()
 
-    val dbMsgs = vm.msgsList.collectAsStateWithLifecycle()
-    val messages = remember { dbMsgs.value }
-    if (messages.isEmpty()) vm.getMessages(companion) // need it, to write the path name
+    val messages by vm.msgsList.collectAsStateWithLifecycle()
+
+    if (messages.isEmpty()) {       // need it, to write the path name
+        vm.getMessages(companion)
+        vm.getCompanionOnlineStatus(companion.userId ?: "")
+    }
 
     val firstUnreadMessage = messages
         .firstOrNull { !it.status.read && it.nameFrom != vm.chatRepo.currentUser.username }
 
-    val dbSorted = vm.msgsDateList.collectAsStateWithLifecycle()
-    val sortedMessages = remember { dbSorted.value }
+    val sortedMessages by vm.msgsDateList.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
-
     val scrollContext = rememberScrollContext(listState)
 
     val keyboardHeight = WindowInsets.ime.getBottom(LocalDensity.current)
@@ -159,7 +151,7 @@ fun ChatScreen(
             clickOnSearch.value = false
         } else {
             if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
-            vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
+            vm.resetCompanionOnlineStatus() //    reset online state when you left the chat screen
             vm.resetMessagesLists()
             onIconCLick()
         }
@@ -168,15 +160,6 @@ fun ChatScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var inputText by remember { mutableStateOf("") }
-
-    val calendar = Calendar.getInstance().time
-    val time = DateFormat.getPatternInstance(DateFormat.HOUR24_MINUTE).format(calendar)
-    val sdf = SimpleDateFormat("dd LLL yyyy", Locale.getDefault())
-    val date = sdf.format(calendar).toString()
-    val currentDateTime = LocalDateTime.now()
-    // Transform current time and date into string with format ISO 8601
-    val formatter = DateTimeFormatter.ISO_DATE_TIME
-    val timeDate = currentDateTime.atZone(ZoneId.systemDefault()).format(formatter)
 
     val checkedState = remember { mutableStateOf(true) }
 
@@ -216,7 +199,7 @@ fun ChatScreen(
                                     style = MaterialTheme.typography.displayMedium,
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                if (isOnline.isNotEmpty() && isOnline[0]) {
+                                if (isOnline) {
                                     AutoResizedText(
                                         text = stringResource(id = R.string.online),
                                         style = MaterialTheme.typography.displaySmall
@@ -239,7 +222,7 @@ fun ChatScreen(
                         IconButton(
                             onClick = {
                                 if (firstUnreadMessage != null) vm.updateMessageStatus(companion)
-                                keyboardController?.hide() // close the keyboard
+                                keyboardController?.hide() //      close the keyboard
                                 vm.resetCompanionOnlineStatus() // reset online state when you left the chat screen
                                 vm.resetMessagesLists()
                                 onIconCLick.invoke()
@@ -302,10 +285,7 @@ fun ChatScreen(
                             onClick = {
                                 vm.addNewMessage(
                                     userData = companion,
-                                    msg = inputText,
-                                    time = time,
-                                    date = date,
-                                    dateTime = timeDate
+                                    msg = inputText
                                 )
                                 inputText = ""
                                 if (firstUnreadMessage != null) vm.updateMessageStatus(companion)

@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -73,13 +74,11 @@ fun CompanionsScreen(
     sharedVM: SharedChatViewModel = viewModel(),
     bottomNavPadding: PaddingValues
 ) {
+    val companionsList by vm.companionsList.collectAsStateWithLifecycle()
 
-    val dbCompanions = vm.companionsList.collectAsStateWithLifecycle()
-    val companionsList = remember { dbCompanions.value }
+    val chatsList by vm.chatsList.collectAsStateWithLifecycle()
 
-    val dbChats = vm.chatsList.collectAsStateWithLifecycle()
-    val chatsList = remember { dbChats.value }
-    val companionsInChat = chatsList.map { it.companion }
+    val companionsInChat = chatsList.mapNotNull { it.companion }
 
     Scaffold(
         topBar = {
@@ -225,7 +224,6 @@ fun CompanionCard(
     chatsVm: ChatsHomeViewModel,
     sharedVM: SharedChatViewModel = viewModel()
 ) {
-
     val messageDialogState = remember { mutableStateOf(false) }
 
     Card(

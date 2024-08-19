@@ -21,6 +21,7 @@ coil = "2.6.0"
 accomPerm = "0.31.1-alpha"
 worker = "2.9.0"
 lifecycle = "2.8.0"
+coroutines = "1.8.0"
 
 
 [libraries]
@@ -62,7 +63,7 @@ androidx-work = { group = "androidx.work", name = "work-runtime-ktx", version.re
 androidx-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
-
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

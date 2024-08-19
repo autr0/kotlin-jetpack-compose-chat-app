@@ -1,8 +1,6 @@
 package com.devautro.firebasechatapp.chatScreen.data
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.devautro.firebasechatapp.chatScreen.data.model.MessagesDate
 import com.devautro.firebasechatapp.core.data.dateTimeToLocalTimeZone
 import com.devautro.firebasechatapp.core.data.model.Message
 import com.devautro.firebasechatapp.core.data.model.MessageStatus
@@ -12,11 +10,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(
     private val auth: FirebaseAuth,
-    private val database: FirebaseDatabase
+    database: FirebaseDatabase
 ) {
     private val messagesRef = database.getReference("messages")
     var currentUser = UserData(
@@ -35,44 +37,26 @@ class ChatRepository @Inject constructor(
         )
     }
 
-    suspend fun getMessages(
-        msgsList: SnapshotStateList<Message>,
+    fun getMessages(
         companion: UserData,
-        msgsDateList: SnapshotStateList<MessagesDate>
+        onMessagesReceived: (List<Message>) -> Unit
     ) {
         messagesRef.child("${currentUser.userId}")
             .child("${currentUser.username}_${companion.username}")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    msgsList.clear()
-                    msgsDateList.clear()
-                    val sLast = snapshot.children.lastOrNull()
-                    val lastMsg = sLast?.getValue(Message::class.java)
-                    for (s in snapshot.children) {
-                        val msg = s.getValue(Message::class.java)
-                        if (msg != null && !msgsList.contains(msg)) {
+
+                    val msgsList = snapshot.children.mapNotNull { s ->
+                        s.getValue(Message::class.java)?.let { msg ->
                             val dt = dateTimeToLocalTimeZone(msg.dateTime!!)
-                            msgsList.add(
-                                msg.copy(
-                                    date = dt.date,
-                                    timeSent = dt.time
-                                )
+                            msg.copy(
+                                date = dt.date,
+                                timeSent = dt.time
                             )
-
-//                          Check this out!
-                            if (msg == lastMsg) {
-                                msgsDateList.addAll(
-                                    msgsList.groupBy { it.date }.map {
-                                        MessagesDate(
-                                            date = it.key.toString(),
-                                            messages = it.value
-                                        )
-                                    }
-                                )
-                            }
-
                         }
-                    }
+                    }.distinctBy { it.id }
+
+                    onMessagesReceived(msgsList)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -84,33 +68,59 @@ class ChatRepository @Inject constructor(
     }
 
     suspend fun updateMessageStatus(
-        msgsList: SnapshotStateList<Message>,
+        msgsList: List<Message>,
         companion: UserData
-    ) {
+    ) = coroutineScope {
         val updatedMessageStatus = hashMapOf<String, Any>()
 
-        msgsList.forEach {msg ->
-            if (!msg.status.read && msg.nameFrom != currentUser.username) {
-                val dt = dateTimeToLocalTimeZone(msg.dateTime!!)
-                updatedMessageStatus.putIfAbsent(
-                    msg.id!!,
-                    msg.copy(
-                        date = dt.date,
-                        timeSent = dt.time,
-                        status = MessageStatus(read = true)
-                    )
+        try {
+            msgsList.mapNotNull { msg ->
+                if (!msg.status.read && msg.nameFrom != currentUser.username) {
+                    val dt = dateTimeToLocalTimeZone(msg.dateTime ?: return@mapNotNull null)
+
+                    msg.id?.let { id ->
+                        updatedMessageStatus[id] = msg.copy(
+                            date = dt.date,
+                            timeSent = dt.time,
+                            status = MessageStatus(read = true)
+                        )
+                    }
+                } else {
+                    null
+                }
+            }
+
+            val updateMessageStatusForCurrentUser = async {
+                updateMessagesForUser(
+                    currentUser = currentUser,
+                    companion = companion,
+                    updatedMessageStatus = updatedMessageStatus
                 )
             }
+
+            val updateMessageStatusForCompanion = async {
+                updateMessagesForUser(
+                    currentUser = companion,
+                    companion = currentUser,
+                    updatedMessageStatus = updatedMessageStatus
+                )
+            }
+
+            awaitAll(updateMessageStatusForCurrentUser, updateMessageStatusForCompanion)
+        } catch (e: Exception) {
+            Log.e("MyLog", "Failed to update message status: ${e.message}")
         }
 
-        messagesRef.child(companion.userId!!)
-            .child("${companion.username}_${currentUser.username}")
-            .updateChildren(updatedMessageStatus)
+    }
 
+    private suspend fun updateMessagesForUser(
+        currentUser: UserData,
+        companion: UserData,
+        updatedMessageStatus: HashMap<String, Any>
+    ) {
         messagesRef.child(currentUser.userId!!)
             .child("${currentUser.username}_${companion.username}")
-            .updateChildren(updatedMessageStatus)
-
+            .updateChildren(updatedMessageStatus).await()
     }
 
 
@@ -120,38 +130,53 @@ class ChatRepository @Inject constructor(
         time: String,
         date: String,
         dateTime: String
-    ) {
-        val key = messagesRef.push().key
+    ) = coroutineScope {
+        val key = messagesRef.push().key ?: return@coroutineScope
 
-        messagesRef.child("${currentUser.userId}")
-            .child("${currentUser.username}_${companion.username}")
-            .child(key /*messagesRef.push().key*/ ?: "unknownMessage")
-            .setValue(
-                Message(
-                    nameFrom = currentUser.username,
-                    message = message,
-                    status = MessageStatus(received = true),
-                    timeSent = time,
-                    date = date,
-                    dateTime = dateTime,
-                    id = key
-                )
-            )
+        val messageData = Message(
+            nameFrom = currentUser.username,
+            message = message,
+            status = MessageStatus(received = true),
+            timeSent = time,
+            date = date,
+            dateTime = dateTime,
+            id = key
+        )
 
-        messagesRef.child("${companion.userId}")
-            .child("${companion.username}_${currentUser.username}")
-            .child(key/*messagesRef.push().key*/ ?: "unknownMessage")
-            .setValue(
-                Message(
-                    nameFrom = currentUser.username,
-                    message = message,
-                    status = MessageStatus(received = true),
-                    timeSent = time,
-                    date = date,
-                    dateTime = dateTime,
-                    id = key
-                )
+//      nested fun
+        suspend fun saveMessage(
+            currentUser: UserData,
+            companion: UserData,
+            key: String
+        ) {
+            try {
+                messagesRef.child("${currentUser.userId}")
+                    .child("${currentUser.username}_${companion.username}")
+                    .child(key)
+                    .setValue(messageData)
+                    .await()
+            } catch (e: Exception) {
+                Log.e("MyLog", "Failed to add message: ${e.message}")
+            }
+        }
+
+        val addMessageToCurrentUser = async {
+            saveMessage(
+                currentUser = currentUser,
+                companion = companion,
+                key = key
             )
+        }
+
+        val addMessageToCompanion = async {
+            saveMessage(
+                currentUser = companion,
+                companion = currentUser,
+                key = key
+            )
+        }
+
+        awaitAll(addMessageToCurrentUser, addMessageToCompanion)
     }
 
     suspend fun deleteMessage(
@@ -159,30 +184,48 @@ class ChatRepository @Inject constructor(
         key: String,
         removeFromCompanion: Boolean
     ) {
-        messagesRef.child(currentUser.userId!!)
-            .child("${currentUser.username}_${companion.username}")
-            .child(key)
-            .removeValue()
+        try {
+            removeMessage(
+                currentUser = currentUser,
+                companion = companion,
+                key = key
+            )
 
-        if (removeFromCompanion) {
-            messagesRef.child(companion.userId!!)
-                .child("${companion.username}_${currentUser.username}")
-                .child(key)
-                .removeValue()
+            if (removeFromCompanion) {
+                removeMessage(
+                    currentUser = companion,
+                    companion = currentUser,
+                    key = key
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("MyLog", "Failed to delte message: ${e.message}")
         }
 
     }
 
-    suspend fun getCompanionOnlineStatus(onlineState: SnapshotStateList<Boolean>, companionId: String) {
+    private suspend fun removeMessage(
+        currentUser: UserData,
+        companion: UserData,
+        key: String
+    ) {
+        messagesRef.child(currentUser.userId!!)
+            .child("${currentUser.username}_${companion.username}")
+            .child(key)
+            .removeValue()
+            .await()
+    }
+
+    fun getCompanionOnlineStatus(
+        companionId: String,
+        onOnlineStatusReceived: (Boolean) -> Unit
+    ) {
         if (companionId.isNotEmpty()) {
             onlineStateRef.child(companionId).addValueEventListener(
                 object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        onlineState.clear()
                         val companionStatus = snapshot.getValue(Boolean::class.java)
-                        if (companionStatus != null && companionId.isNotEmpty()) {
-                            onlineState.add(companionStatus)
-                        }
+                        onOnlineStatusReceived(companionStatus ?: false)
                     }
 
                     override fun onCancelled(error: DatabaseError) {

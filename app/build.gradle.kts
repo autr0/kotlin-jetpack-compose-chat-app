@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.viewmodel.ktx)
     implementation(libs.androidx.viewmodel.compose)
     implementation(libs.androidx.runtime.compose)
+    implementation(libs.kotlinx.coroutines)
 
 
 //    Default dependencies

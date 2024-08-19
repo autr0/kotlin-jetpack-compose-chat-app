@@ -1,7 +1,5 @@
 package com.devautro.firebasechatapp.profile.presentation
 
-import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devautro.firebasechatapp.profile.data.ProfileDataUploader
@@ -17,7 +15,7 @@ class ProfileViewModel @Inject constructor(
     private val profileData: ProfileDataUploader
 ): ViewModel() {
 
-    private val _sizes = MutableStateFlow(SnapshotStateMap<String, Int>())
+    private val _sizes = MutableStateFlow(mapOf<String, Int>())
     val sizes = _sizes.asStateFlow()
 
     init {
@@ -29,7 +27,9 @@ class ProfileViewModel @Inject constructor(
 
     private fun getSizes() {
         viewModelScope.launch {
-            profileData.getProfileData(_sizes.value)
+            profileData.getProfileData{ data ->
+                _sizes.value = data
+            }
         }
     }
 
@@ -39,7 +39,7 @@ class ProfileViewModel @Inject constructor(
 
     fun resetProfileVmState() {
         updateCurrentUser()
-        _sizes.update { SnapshotStateMap<String, Int>() }
+        _sizes.update { mutableMapOf() }
         if (profileData.currentUser.userId != null) {
             getSizes()
         }

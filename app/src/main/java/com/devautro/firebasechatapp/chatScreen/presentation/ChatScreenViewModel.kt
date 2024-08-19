@@ -1,6 +1,5 @@
 package com.devautro.firebasechatapp.chatScreen.presentation
 
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devautro.firebasechatapp.chatScreen.data.ChatRepository
@@ -13,19 +12,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.icu.text.DateFormat
+import android.icu.util.Calendar
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @HiltViewModel
 class ChatScreenViewModel @Inject constructor(
     val chatRepo: ChatRepository
 ) : ViewModel() {
 
-    private val _msgsList = MutableStateFlow(SnapshotStateList<Message>())
+    private val _msgsList = MutableStateFlow(listOf<Message>())
     val msgsList = _msgsList.asStateFlow()
 
-    private val _msgsDateList = MutableStateFlow(SnapshotStateList<MessagesDate>())
+    private val _msgsDateList = MutableStateFlow(listOf<MessagesDate>())
     val msgsDateList = _msgsDateList.asStateFlow()
 
-    private val _companionOnlineStatus = MutableStateFlow(SnapshotStateList<Boolean>())
+    private val _companionOnlineStatus = MutableStateFlow(false)
     val companionOnlineStatus = _companionOnlineStatus.asStateFlow()
 
     private val _msgsDateFlatList = MutableStateFlow<List<String>>(emptyList())
@@ -45,18 +51,34 @@ class ChatScreenViewModel @Inject constructor(
 
     fun getMessages(companion: UserData) {
         viewModelScope.launch {
-            chatRepo.getMessages(_msgsList.value, companion, _msgsDateList.value)
+            chatRepo.getMessages(companion) { msgs ->
+                _msgsList.value = msgs
+                _msgsDateList.value = msgs.groupBy { it.date }.map {
+                    MessagesDate(
+                        date = it.key.toString(),
+                        messages = it.value
+                    )
+                }
+            }
         }
     }
 
     fun addNewMessage(
         userData: UserData,
-        msg: String,
-        time: String,
-        date: String,
-        dateTime: String
+        msg: String
     ) {
         viewModelScope.launch {
+            val calendar = Calendar.getInstance().time
+            val time = DateFormat.getPatternInstance(DateFormat.HOUR24_MINUTE).format(calendar)
+
+            val sdf = SimpleDateFormat("dd LLL yyyy", Locale.getDefault())
+            val date = sdf.format(calendar).toString()
+
+            // Transform current time and date into string with format ISO 8601
+            val formatter = DateTimeFormatter.ISO_DATE_TIME
+            val currentDateTime = LocalDateTime.now()
+            val dateTime = currentDateTime.atZone(ZoneId.systemDefault()).format(formatter)
+
             chatRepo.addMessage(
                 companion = userData,
                 message = msg,
@@ -91,18 +113,20 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     fun resetMessagesLists() {
-        _msgsList.update { SnapshotStateList() }
-        _msgsDateList.update { SnapshotStateList() }
+        _msgsList.update { listOf() }
+        _msgsDateList.update { listOf() }
     }
 
     fun getCompanionOnlineStatus(companionId: String) {
         viewModelScope.launch {
-            chatRepo.getCompanionOnlineStatus(_companionOnlineStatus.value, companionId)
+            chatRepo.getCompanionOnlineStatus(companionId) { isOnline ->
+                _companionOnlineStatus.value = isOnline
+            }
         }
     }
 
     fun resetCompanionOnlineStatus() {
-        _companionOnlineStatus.update { SnapshotStateList() }
+        _companionOnlineStatus.update { false }
     }
 
     fun updateSearchText(newText: String) {
@@ -117,7 +141,7 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     fun shouldPink(msg: String): Boolean {
-        return if(searchText.value.isNotEmpty()) msg.contains(searchText.value, ignoreCase = true)
+        return if (searchText.value.isNotEmpty()) msg.contains(searchText.value, ignoreCase = true)
         else false
     }
 
@@ -145,7 +169,8 @@ class ChatScreenViewModel @Inject constructor(
 
     fun goToNextMatch() {
         if (_matchingMessageIndices.value.isNotEmpty()) {
-            _currentMatchIndex.value = (_currentMatchIndex.value + 1) % _matchingMessageIndices.value.size
+            _currentMatchIndex.value =
+                (_currentMatchIndex.value + 1) % _matchingMessageIndices.value.size
         }
     }
 
