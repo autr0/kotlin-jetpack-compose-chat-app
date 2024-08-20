@@ -1,9 +1,12 @@
 package com.devautro.firebasechatapp
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.devautro.firebasechatapp.chatScreen.presentation.ChatScreenViewModel
@@ -15,6 +18,9 @@ import com.devautro.firebasechatapp.profile.presentation.ProfileViewModel
 import com.devautro.firebasechatapp.sign_in.data.GoogleAuthUIClient
 import com.devautro.firebasechatapp.ui.theme.FirebaseChatAppTheme
 import com.devautro.firebasechatapp.users.presentation.UsersScreenViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,6 +41,7 @@ class MainActivity : ComponentActivity() {
     private val chatScreenVm: ChatScreenViewModel by viewModels()
     private val onlineTrackVm: OnlineTrackerViewModel by viewModels()
 
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,6 +54,19 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val permissionState = rememberPermissionState(
+                    permission = Manifest.permission.POST_NOTIFICATIONS
+                )
+
+                LaunchedEffect(key1 = true) {
+                    if (!permissionState.status.isGranted) {
+                        permissionState.launchPermissionRequest()
+                    }
+                }
+
+            }
+
             FirebaseChatAppTheme {
                 MainFunction(
                     googleAuthUIClient = googleAuthUIClient,

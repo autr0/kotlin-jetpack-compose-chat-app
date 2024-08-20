@@ -17,6 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FirebaseChatApp"
         tools:targetApi="31">
+        <!-- provider below to remove default initialization without needed WorkerFactory -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove">
+        </provider>
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"
