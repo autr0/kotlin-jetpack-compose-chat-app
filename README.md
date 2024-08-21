@@ -23,7 +23,7 @@ The Wave Chat app contains several screens, bottom navigation, an app users list
 <table>
     <tr>
         <td><img src="images/1.Profile(Dark)small.jpg" alt="Profile(Dark)" width="100%;"/></td>
-        <td><img src="images/1.Profilesmall.png" alt="Profile" width="99%;"/></td>
+        <td><img src="images/4.BottomNavigationLight(en).jpg" alt="Profile" width="99%;"/></td>
     </tr>
 </table>
 
@@ -31,7 +31,7 @@ The Wave Chat app contains several screens, bottom navigation, an app users list
 <table>
     <tr>
         <td><img src="images/6.BottomNavigation(Dark).jpg" alt="bottomNavDark" width="100%;"/></td>
-        <td><img src="images/4.BottomNavigation(en).png" alt="bottomNav" width="92%;"/></td>
+        <td><img src="images/4.BottomNavigationLight(en).jpg" alt="bottomNav" width="92%;"/></td>
     </tr>
 </table>
 
