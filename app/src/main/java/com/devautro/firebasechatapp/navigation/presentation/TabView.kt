@@ -2,7 +2,6 @@ package com.devautro.firebasechatapp.navigation.presentation
 
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,7 +25,7 @@ fun TabView(
 
     NavigationBar {
         // looping over each tab to generate the views and navigation for each item
-        tabBarItems.forEachIndexed() { index, tabBarItem ->
+        tabBarItems.forEach { tabBarItem ->
             NavigationBarItem(
                 selected = currentDestination?.hierarchy?.any { it.route == tabBarItem.title } == true,
                 onClick = {
@@ -59,7 +58,6 @@ fun TabView(
 
 // This component helps to clean up the API call from our TabView above,
 // but could just as easily be added inside the TabView without creating this custom component
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabBarIconView(
     isSelected: Boolean,
@@ -79,7 +77,6 @@ fun TabBarIconView(
 // This component helps to clean up the API call from our TabBarIconView above,
 // but could just as easily be added inside the TabBarIconView without creating this custom component
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun TabBarBadgeView(count: Int? = null) {
     if (count != null) {
         Badge {

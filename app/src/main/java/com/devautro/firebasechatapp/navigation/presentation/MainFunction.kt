@@ -74,7 +74,7 @@ fun MainFunction(
         title = stringResource(id = R.string.Chats),
         selectedIcon = Icons.Filled.Email,
         unselectedIcon = Icons.Outlined.Email,
-//                badgeAmount = 7 // pass num of the new msgs here!
+//      badgeAmount = 7                       pass num of the new msgs here!
     )
     val usersTab = TabBarItem(
         title = stringResource(id = R.string.Users),
